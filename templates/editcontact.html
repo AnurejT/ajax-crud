@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Contact</title>
+</head>
+
+<body>
+
+<h2>Edit Contact</h2>
+
+<form id="f1" enctype="multipart/form-data">
+
+    <input type="hidden" name="id" value="{{ data.id }}">
+
+    {% csrf_token %}
+
+    <label>Name: </label>
+    <input type="text" name="name" id="name" value="{{ data.name }}">
+    <span id="nameError" style="color:red;"></span>
+    <br><br>
+
+
+    <label>Phone Number: </label>
+    <input type="text" name="phone" id="phone" value="{{ data.phone }}">
+    <span id="phoneError" style="color:red;"></span>
+    <br><br>
+
+
+    <label>Email: </label>
+    <input type="text" name="email" id="email" value="{{ data.email }}">
+    <span id="emailError" style="color:red;"></span>
+    <br><br>
+
+
+    <label>Course: </label>
+
+    <select name="course" id="course">
+
+        <option value="">Select the course</option>
+
+        {% for i in courses %}
+
+        <option value="{{ i.id }}"
+            {% if i.id == data.COURSES.id %}
+                selected
+            {% endif %}
+        >
+            {{ i.course }}
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+    <span id="courseError" style="color:red;"></span>
+
+    <br><br>
+
+
+    <label>Current Photo: </label>
+    <br>
+
+    <img src="{{ data.photo }}" width="40" height="40">
+
+    <br><br>
+
+    <label>Change Photo: </label>
+    <input type="file" name="photo" id="photo">
+
+    <span id="photoError" style="color:red;"></span>
+
+    <br><br>
+
+
+    <input type="submit" value="submit">
+
+</form>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+
+<script>
+
+$(document).ready(function () {
+
+    $('#f1').submit(function (e) {
+
+        e.preventDefault();
+
+
+        $('#nameError').text('');
+        $('#phoneError').text('');
+        $('#emailError').text('');
+        $('#courseError').text('');
+        $('#photoError').text('');
+
+
+        var valid = true;
+
+        var name = $('#name').val().trim();
+
+        if (name == '') {
+
+            $('#nameError').text('Name is required');
+
+            valid = false;
+
+        }
+        else if (!/^[a-zA-Z ]+$/.test(name)) {
+
+            $('#nameError').text('Name should contain only letters');
+
+            valid = false;
+
+        }
+
+
+        var phone = $('#phone').val().trim();
+
+        if (phone == '') {
+
+            $('#phoneError').text('Phone number is required');
+
+            valid = false;
+
+        }
+        else if (!/^[0-9]{10}$/.test(phone)) {
+
+            $('#phoneError').text('Enter a valid 10 digit phone number');
+
+            valid = false;
+
+        }
+
+
+        var email = $('#email').val().trim();
+
+        if (email == '') {
+
+            $('#emailError').text('Email is required');
+
+            valid = false;
+
+        }
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+
+            $('#emailError').text('Enter a valid email address');
+
+            valid = false;
+
+        }
+
+        var course = $('#course').val();
+
+        if (course == '') {
+
+            $('#courseError').text('Please select a course');
+
+            valid = false;
+
+        }
+
+
+
+        var photo = $('#photo')[0].files[0];
+
+        if (photo) {
+
+            var fileName = photo.name.toLowerCase();
+
+            if (!/\.(jpg|jpeg|png)$/.test(fileName)) {
+
+                $('#photoError').text(
+                    'Only JPG, JPEG or PNG files are allowed'
+                );
+
+                valid = false;
+
+            }
+
+        }
+
+        if (!valid) {
+
+            return;
+
+        }
+
+        var formdata = new FormData(this);
+
+        console.log(formdata);
+
+
+        $.ajax({
+
+            url: '/editcontact_post/',
+
+            type: 'POST',
+
+            data: formdata,
+
+            processData: false,
+
+            contentType: false,
+
+
+            success: function (response) {
+
+                if (response.status == 'ok') {
+
+                    window.location.href = '/contactbook_get/';
+
+                }
+
+            },
+
+
+            error: function () {
+
+                alert('Something went wrong');
+
+            }
+
+        });
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>
+

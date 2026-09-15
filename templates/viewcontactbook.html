@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Contact Book</title>
+</head>
+
+<body>
+
+<h2>Contact Book</h2>
+
+<label>Courses: </label>
+<select id="course">
+    <option value="">All Courses</option>
+    {% for i in courses %}
+        <option value="{{ i.id }}">{{ i.course }}</option>
+    {% endfor %}
+</select><br><br>
+
+<input type="text" id="search" placeholder="Search contact...">
+
+<br><br>
+
+<table border="1" id="t">
+
+    <tr>
+        <th>SINO</th>
+        <th>NAME</th>
+        <th>PHONE</th>
+        <th>EMAIL</th>
+        <th>COURSE</th>
+        <th>PHOTO</th>
+        <th colspan="2">ACTION</th>
+    </tr>
+
+</table>
+
+<br>
+
+<a href="/addcontact_get/">Add Contact</a>
+
+<br><br>
+
+<button id="prev">Previous</button>
+
+<span id="page">1</span>
+
+<button id="next">Next</button>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script>
+
+var currentPage = 1;
+
+function loadContacts() {
+
+    var search = $('#search').val();
+    var course = $('#course').val();
+
+    $.ajax({
+
+        url: '/contactbook_get2/',
+
+        type: 'GET',
+
+        data: {
+
+            search: search,
+            page: currentPage,
+            course: course,
+
+        },
+
+        success: function(response) {
+
+            $('#t tr:not(:first)').remove();
+
+            $.each(response.data, function(index, value) {
+
+                $('#t').append(`
+
+                    <tr>
+                  <td>${(currentPage - 1) * 5 + index + 1}</td>
+                        <td>${value[1]}</td>
+                        <td>${value[2]}</td>
+                        <td>${value[3]}</td>
+                        <td>${value[4]}</td>
+                        <td><img src="${value[5]}" width="80" height="80"></td>
+                        <td><a href="/editcontact_get/${value[0]}">Edit</a></td>
+                        <td><button class="deletebtn" data-id="${value[0]}">Delete</button></td>
+                    </tr>
+                `);
+            });
+
+            $('#page').text(response.current_page);
+
+            $('#prev').prop(
+                'disabled',
+                response.current_page == 1
+            );
+
+            $('#next').prop(
+                'disabled',
+                response.current_page == response.total_pages
+            );
+
+        }
+
+    });
+
+}
+
+$(document).ready(function() {
+
+    loadContacts();
+
+});
+
+
+$('#search').keyup(function() {
+
+    currentPage = 1;
+
+    loadContacts();
+
+});
+
+$('#next').click(function() {
+
+    currentPage++;
+
+    loadContacts();
+
+});
+
+$('#prev').click(function() {
+
+    if (currentPage > 1) {
+
+        currentPage--;
+
+        loadContacts();
+
+    }
+
+});
+
+
+$(document).on('click', '.deletebtn', function() {
+
+    var id = $(this).data('id');
+
+
+    $.ajax({
+
+        url: '/deletecontact_post/' + id + '/',
+
+        type: 'POST',
+
+        success: function(response) {
+
+            if (response.status == 'ok') {
+
+                loadContacts();
+
+            }
+
+        }
+
+    });
+
+});
+$('#course').change(function() {
+
+    currentPage = 1;
+
+    loadContacts();
+
+});
+
+
+
+</script>
+
+</body>
+
+</html>
