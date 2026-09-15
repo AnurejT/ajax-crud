@@ -38,7 +38,7 @@
 
 <br>
 
-<a href="/addcontact_get/">Add Contact</a>
+<a href="/addcontact_get/">Add Contact</a>  <a href="/homepage_get/">Home</a>
 
 <br><br>
 
@@ -89,7 +89,7 @@ function loadContacts() {
                         <td>${value[3]}</td>
                         <td>${value[4]}</td>
                         <td><img src="${value[5]}" width="80" height="80"></td>
-                        <td><a href="/editcontact_get/${value[0]}">Edit</a></td>
+                        <td><button class="edit-btn"><a href="/editcontact_get/${value[0]}">Edit</a></button></td>
                         <td><button class="deletebtn" data-id="${value[0]}">Delete</button></td>
                     </tr>
                 `);

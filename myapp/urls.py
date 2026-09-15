@@ -20,6 +20,7 @@ from django.urls import path
 from myapp import views
 
 urlpatterns = [
+    path('homepage_get/', views.homepage_get),
     path('addcontact_get/', views.addcontact_get),
     path('addcontact_post/', views.addcontact_post),
     path('contactbook_get/', views.contactbook_get),

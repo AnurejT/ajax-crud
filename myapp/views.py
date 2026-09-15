@@ -10,6 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from myapp.models import ContactBook, Courses
 
+def homepage_get(request):
+    return render(request, 'home.html')
 
 def addcontact_get(request):
 
@@ -60,7 +62,7 @@ def contactbook_get2(request):
         contacts = contacts.filter(name__icontains = search)
 
     if course:
-        contacts = contacts.filter(COURSES_id=course)
+        contacts = contacts.filter(COURSES_id = course)
 
     paginator = Paginator(contacts, 5)
     data = paginator.get_page(page)
