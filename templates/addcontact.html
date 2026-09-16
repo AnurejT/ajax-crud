@@ -33,13 +33,21 @@
     <select name="course" id="course">
         <option value="">select the course</option>
 
-        {% for i in data %}
+        {% for i in courses %}
             <option value="{{ i.id }}">{{ i.course }}</option>
         {% endfor %}
 
     </select>
-
     <span id="courseError" style="color:red;"></span>
+    <br><br>
+
+    <label>Subjects: </label>
+    <select name="subject" id="subject">
+
+        <option value="">select the subject</option>
+
+    </select>
+    <span id="subjectError" style="color:red;"></span>
     <br><br>
 
     <label>Photo: </label>
@@ -58,6 +66,42 @@
 
 <script>
 
+    $('#course').change(function () {
+
+    var course_id = $(this).val();
+
+    $('#subject').html('<option value="">select the subject</option>');
+
+    if (course_id != '') {
+
+        $.ajax({
+
+            url: '/subjects_get/',
+            type: "GET",
+            data: {
+                course: course_id
+            },
+
+            success: function (response) {
+
+                for (var i = 0; i < response.data.length; i++) {
+
+                    $('#subject').append(
+                        '<option value="' + response.data[i].id + '">' +
+                        response.data[i].subject +
+                        '</option>'
+                    );
+
+                }
+
+            }
+
+        });
+
+    }
+
+});
+
 $(document).ready(function () {
 
     $('#f1').submit(function (e) {
@@ -68,6 +112,7 @@ $(document).ready(function () {
         $('#phoneError').text('');
         $('#emailError').text('');
         $('#courseError').text('');
+        $('#subjectError').text('');
         $('#photoError').text('');
 
         var valid = true;
@@ -123,6 +168,14 @@ $(document).ready(function () {
         if (course == '') {
 
             $('#courseError').text('Please select a course');
+            valid = false;
+
+        }
+        var subject = $('#subject').val();
+
+        if (subject == '') {
+
+            $('#subjectError').text('Please select a subject');
             valid = false;
 
         }

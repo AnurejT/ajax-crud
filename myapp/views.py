@@ -8,7 +8,8 @@ from django.core.paginator import Paginator
 # Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 
-from myapp.models import ContactBook, Courses
+from myapp.models import ContactBook, Courses, Subjects
+
 
 def homepage_get(request):
     return render(request, 'home.html')
@@ -17,14 +18,30 @@ def addcontact_get(request):
 
     courses = Courses.objects.all()
 
-    return render(request, 'addcontact.html', {'data':courses})
+    return render(request, 'addcontact.html', {'courses':courses})
+
+def subjects_get(request):
+
+    course_id = request.GET['course']
+    subjects = Subjects.objects.filter(COURSES_id = course_id)
+
+    l = []
+    for i in subjects:
+        l.append(
+            {
+                'id':i.id,
+                'subject':i.subject,
+            }
+        )
+
+    return JsonResponse({'data':l})
 
 def addcontact_post(request):
 
     name = request.POST['name']
     phone = request.POST['phone']
     email = request.POST['email']
-    course = request.POST['course']
+    subject = request.POST['subject']
 
     a = ContactBook()
 
@@ -39,7 +56,7 @@ def addcontact_post(request):
     a.name = name
     a.phone = phone
     a.email = email
-    a.COURSES_id = course
+    a.SUBJECTS_id = subject
     a.save()
 
     return JsonResponse({'status':'ok'})
@@ -62,7 +79,7 @@ def contactbook_get2(request):
         contacts = contacts.filter(name__icontains = search)
 
     if course:
-        contacts = contacts.filter(COURSES_id = course)
+        contacts = contacts.filter(SUBJECTS__COURSES_id = course)
 
     paginator = Paginator(contacts, 5)
     data = paginator.get_page(page)
@@ -75,7 +92,8 @@ def contactbook_get2(request):
                 i.name,
                 i.phone,
                 i.email,
-                i.COURSES.course,
+                i.SUBJECTS.COURSES.course,
+                i.SUBJECTS.subject,
                 i.photo,
             ]
         )
@@ -96,6 +114,7 @@ def editcontact_post(request):
     phone = request.POST['phone']
     email = request.POST['email']
     course = request.POST['course']
+    subject = request.POST['subject']
 
     a = ContactBook.objects.get(id = id)
 
@@ -110,7 +129,8 @@ def editcontact_post(request):
     a.name = name
     a.phone = phone
     a.email = email
-    a.COURSES_id = course
+    a.SUBJECTS_id = subject
+    a.SUBJECTS.COURSES_id = course
     a.save()
 
     return JsonResponse({'status':'ok'})

@@ -35,7 +35,6 @@
 
 
     <label>Course: </label>
-
     <select name="course" id="course">
 
         <option value="">Select the course</option>
@@ -43,7 +42,7 @@
         {% for i in courses %}
 
         <option value="{{ i.id }}"
-            {% if i.id == data.COURSES.id %}
+            {% if i.id == data.SUBJECTS.COURSES.id %}
                 selected
             {% endif %}
         >
@@ -55,6 +54,18 @@
     </select>
 
     <span id="courseError" style="color:red;"></span>
+
+    <br><br>
+
+ <label>Subject: </label>
+
+    <select name="subject" id="subject">
+
+        <option value="">Select the subject</option>
+
+    </select>
+
+    <span id="subjectError" style="color:red;"></span>
 
     <br><br>
 
@@ -82,158 +93,133 @@
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-
 <script>
-
 $(document).ready(function () {
 
+    // Function to load subjects based on course ID
+    function loadSubjects(courseId, selectedSubjectId) {
+        if (courseId != '') {
+            $.ajax({
+                url: '/subjects_get/',
+                type: "GET",
+                data: { course: courseId },
+                success: function (response) {
+                    $('#subject').html('<option value="">Select the subject</option>');
+                    for (var i = 0; i < response.data.length; i++) {
+                        var isSelected = (response.data[i].id == selectedSubjectId) ? 'selected' : '';
+                        $('#subject').append(
+                            '<option value="' + response.data[i].id + '" ' + isSelected + '>' +
+                            response.data[i].subject +
+                            '</option>'
+                        );
+                    }
+                }
+            });
+        } else {
+            $('#subject').html('<option value="">Select the subject</option>');
+        }
+    }
+
+    // 1. Trigger on dropdown change
+    $('#course').change(function () {
+        var course_id = $(this).val();
+        loadSubjects(course_id, null); // No pre-selected subject on manual change
+    });
+
+    // 2. Trigger automatically on page load for the edit page
+    var initialCourseId = $('#course').val();
+    var currentSubjectId = "{{ data.SUBJECTS.id }}"; // Adjust this based on your model field name for the subject ID
+    if (initialCourseId) {
+        loadSubjects(initialCourseId, currentSubjectId);
+    }
+
+    // Form submission validation & AJAX
     $('#f1').submit(function (e) {
-
         e.preventDefault();
-
 
         $('#nameError').text('');
         $('#phoneError').text('');
         $('#emailError').text('');
         $('#courseError').text('');
+        $('#subjectError').text('');
         $('#photoError').text('');
 
-
         var valid = true;
-
         var name = $('#name').val().trim();
 
         if (name == '') {
-
             $('#nameError').text('Name is required');
-
             valid = false;
-
-        }
-        else if (!/^[a-zA-Z ]+$/.test(name)) {
-
+        } else if (!/^[a-zA-Z ]+$/.test(name)) {
             $('#nameError').text('Name should contain only letters');
-
             valid = false;
-
         }
-
 
         var phone = $('#phone').val().trim();
-
         if (phone == '') {
-
             $('#phoneError').text('Phone number is required');
-
             valid = false;
-
-        }
-        else if (!/^[0-9]{10}$/.test(phone)) {
-
+        } else if (!/^[0-9]{10}$/.test(phone)) {
             $('#phoneError').text('Enter a valid 10 digit phone number');
-
             valid = false;
-
         }
-
 
         var email = $('#email').val().trim();
-
         if (email == '') {
-
             $('#emailError').text('Email is required');
-
             valid = false;
-
-        }
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             $('#emailError').text('Enter a valid email address');
-
             valid = false;
-
         }
 
         var course = $('#course').val();
-
         if (course == '') {
-
             $('#courseError').text('Please select a course');
-
             valid = false;
-
         }
 
-
+        var subject = $('#subject').val();
+        if (subject == '') {
+            $('#subjectError').text('Please select a subject');
+            valid = false;
+        }
 
         var photo = $('#photo')[0].files[0];
-
         if (photo) {
-
             var fileName = photo.name.toLowerCase();
-
             if (!/\.(jpg|jpeg|png)$/.test(fileName)) {
-
-                $('#photoError').text(
-                    'Only JPG, JPEG or PNG files are allowed'
-                );
-
+                $('#photoError').text('Only JPG, JPEG or PNG files are allowed');
                 valid = false;
-
             }
-
         }
 
         if (!valid) {
-
             return;
-
         }
 
         var formdata = new FormData(this);
 
-        console.log(formdata);
-
-
         $.ajax({
-
             url: '/editcontact_post/',
-
             type: 'POST',
-
             data: formdata,
-
             processData: false,
-
             contentType: false,
-
-
             success: function (response) {
-
                 if (response.status == 'ok') {
-
                     window.location.href = '/contactbook_get/';
-
                 }
-
             },
-
-
             error: function () {
-
                 alert('Something went wrong');
-
             }
-
         });
-
     });
 
 });
 
 </script>
-
 </body>
 </html>
 
